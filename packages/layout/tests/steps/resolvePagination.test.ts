@@ -277,3 +277,40 @@ describe('pagination step', () => {
     expect(true).toBe(true);
   });
 });
+
+test('should take padding into account when splitting pages', async () => {
+  const yoga = await loadYoga();
+
+  const layout = calcLayout({
+    type: 'DOCUMENT',
+    yoga,
+    children: [
+      {
+        type: 'PAGE',
+        box: {},
+        style: {
+          paddingTop: 30,
+          width: 612,
+          height: 792,
+        },
+        props: { wrap: true },
+        children: [
+          {
+            type: 'VIEW',
+            box: {},
+            style: { height: 761, marginBottom: 24 },
+            props: { wrap: true, break: false },
+          },
+          {
+            type: 'VIEW',
+            box: {},
+            style: { height: 80 },
+            props: { wrap: true, break: false },
+          },
+        ],
+      },
+    ],
+  });
+
+  expect(layout.children.length).toBe(2);
+});

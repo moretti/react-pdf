@@ -4,7 +4,7 @@ import { HyphenationCallback } from './font';
 import { PageSize, Orientation } from './page';
 import { Bookmark } from './bookmark';
 
-interface BaseProps {
+export interface BaseProps {
   id?: string;
   fixed?: boolean;
   break?: boolean;

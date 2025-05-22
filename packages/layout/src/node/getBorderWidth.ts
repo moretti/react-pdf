@@ -5,7 +5,7 @@ import { SafeNode } from '../types';
 const getComputedBorder = (
   yogaNode: Yoga.YogaNode | undefined,
   edge: Yoga.Edge,
-) => (yogaNode ? yogaNode.getComputedBorder(edge) : 0);
+) => (yogaNode ? yogaNode.getComputedBorder(edge) : null);
 
 /**
  * Get Yoga computed border width. Zero otherwise
@@ -14,13 +14,29 @@ const getComputedBorder = (
  * @returns Border widths
  */
 const getBorderWidth = (node: SafeNode) => {
-  const { yogaNode } = node;
+  const { yogaNode, box, style } = node;
 
   return {
-    borderTopWidth: getComputedBorder(yogaNode, Yoga.Edge.Top),
-    borderRightWidth: getComputedBorder(yogaNode, Yoga.Edge.Right),
-    borderBottomWidth: getComputedBorder(yogaNode, Yoga.Edge.Bottom),
-    borderLeftWidth: getComputedBorder(yogaNode, Yoga.Edge.Left),
+    borderTopWidth:
+      getComputedBorder(yogaNode, Yoga.Edge.Top) ||
+      box?.borderTopWidth ||
+      style?.borderTopWidth ||
+      0,
+    borderRightWidth:
+      getComputedBorder(yogaNode, Yoga.Edge.Right) ||
+      box?.borderRightWidth ||
+      style?.borderRightWidth ||
+      0,
+    borderBottomWidth:
+      getComputedBorder(yogaNode, Yoga.Edge.Bottom) ||
+      box?.borderBottomWidth ||
+      style?.borderBottomWidth ||
+      0,
+    borderLeftWidth:
+      getComputedBorder(yogaNode, Yoga.Edge.Left) ||
+      box?.borderLeftWidth ||
+      style?.borderLeftWidth ||
+      0,
   };
 };
 

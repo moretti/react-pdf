@@ -1,5 +1,6 @@
 import { SafeNode } from '../types';
 import getWrap from './getWrap';
+import getComputedHeight from './getComputedHeight';
 
 const getBreak = (node: SafeNode) =>
   'break' in node.props ? node.props.break : false;
@@ -8,12 +9,16 @@ const getMinPresenceAhead = (node: SafeNode) =>
   'minPresenceAhead' in node.props ? node.props.minPresenceAhead : 0;
 
 const getFurthestEnd = (elements: SafeNode[]) =>
-  Math.max(...elements.map((node) => node.box.top + node.box.height));
+  Math.max(
+    ...elements.map((node) => {
+      return node.box.top + getComputedHeight(node);
+    }),
+  );
 
 const getEndOfMinPresenceAhead = (child: SafeNode) => {
   return (
     child.box.top +
-    child.box.height +
+    getComputedHeight(child) +
     child.box.marginBottom +
     getMinPresenceAhead(child)
   );
@@ -34,7 +39,9 @@ const shouldBreak = (
 ) => {
   if ('fixed' in child.props) return false;
 
-  const shouldSplit = height < child.box.top + child.box.height;
+  const computedHeight = getComputedHeight(child);
+
+  const shouldSplit = height < child.box.top + computedHeight;
   const canWrap = getWrap(child);
 
   // Calculate the y coordinate where the desired presence of the child ends
@@ -44,9 +51,15 @@ const shouldBreak = (
   // (as long as react-pdf does not support breaking into differently sized containers)
   const breakingImprovesPresence = child.box.top > child.box.marginTop;
 
+  // For unwrappable nodes that don't fit entirely, we should break even if they start on the current page
+  const nodeDoesntFitCompletely =
+    child.box.top < height && child.box.top + computedHeight > height;
+  const shouldBreakUnwrappable = !canWrap && nodeDoesntFitCompletely;
+
   return (
     getBreak(child) ||
     (shouldSplit && !canWrap) ||
+    shouldBreakUnwrappable ||
     (!shouldSplit && endOfPresence > height && breakingImprovesPresence)
   );
 };
